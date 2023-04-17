@@ -1,0 +1,1 @@
+python image_manager.py -mask

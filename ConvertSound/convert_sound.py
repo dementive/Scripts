@@ -4,17 +4,16 @@ import os
 from pydub import AudioSegment
 from tqdm import tqdm
 
-# convert to different audio formats                                           
+
 def convert_audio_in_dir(oldformat, newformat, compress=False):
     if compress:
         pass
         c_str = "and compressing"
     else:
         c_str = ""
-    
+
     print(f"Converting {c_str} {oldformat} files to {newformat} files...")
     pbar = []
-    #num_to_convert = len([f for f in os.listdir(path="input") if f.endswith("." + oldformat) and os.path.isfile(os.path.join("input", f))])
     for file in os.scandir(path="input"):
         if not file.name.endswith("." + oldformat):
             print(f"Skipping {file.name}\n")
@@ -45,6 +44,7 @@ def convert_audio_in_dir(oldformat, newformat, compress=False):
             print(f"\t\t\t\tConverted {new_name} to {newformat}", end='')
         else:
             print(f"\t\tConverted {new_name} to {newformat}", end='')
+
 
 if __name__ == '__main__':
     convert_audio_in_dir("wav", "mp3", compress=True)

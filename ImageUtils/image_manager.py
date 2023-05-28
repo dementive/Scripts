@@ -3,6 +3,8 @@ import os
 import re
 from wand import image as WandImage
 from PIL import Image, ImageOps
+from PIL.ImageColor import getcolor, getrgb
+from PIL.ImageOps import grayscale
 from tqdm import tqdm
 
 class ImageManager:
@@ -104,6 +106,37 @@ class ImageManager:
 				filename = filename.replace(old, new).replace(self.inputdir, self.outputdir)
 				img.save(filename=filename)
 
+	def tint_images_in_dir(self, tint='#ffffff'):
+		for i, filename in enumerate(self.get_pbar()):
+			src = Image.open(filename)
+			if src.mode not in ['RGB', 'RGBA']:
+				raise TypeError('Unsupported source image mode: {}'.format(src.mode))
+			src.load()
+
+			tr, tg, tb = getrgb(tint)
+			tl = getcolor(tint, "L")  # tint color's overall luminosity
+			if not tl: tl = 1  # avoid division by zero
+			tl = float(tl)  # compute luminosity preserving tint factors
+			sr, sg, sb = map(lambda tv: tv / tl, (tr, tg, tb))  # per component adjustments
+
+			# create look-up tables to map luminosity to adjusted tint
+			# (using floating-point math only to compute table)
+			luts = (tuple(map(lambda lr: int(lr*sr + 0.5), range(256))) +
+			        tuple(map(lambda lg: int(lg*sg + 0.5), range(256))) +
+			        tuple(map(lambda lb: int(lb*sb + 0.5), range(256))))
+			lum = grayscale(src)  # 8-bit luminosity version of whole image
+			if Image.getmodebands(src.mode) < 4:
+				merge_args = (src.mode, (lum, lum, lum))  # for RGB verion of grayscale
+			else:  # include copy of src image's alpha layer
+				a = Image.new("L", src.size)
+				a.putdata(src.getdata(3))
+				merge_args = (src.mode, (lum, lum, lum, a))  # for RGBA verion of grayscale
+				luts += tuple(range(256))  # for 1:1 mapping of copied alpha values
+
+			result = Image.merge(*merge_args).point(luts)
+			filename = filename.replace(self.inputdir, self.outputdir)
+			result.save(filename)
+
 def terminal_green(string):
 	return "\033[92m{}\033[00m".format(string)
 
@@ -115,7 +148,7 @@ def main():
 		input_dir = sys.argv[1]
 		output_dir = sys.argv[2]
 		mode = sys.argv[3]
-		if mode not in ("-convert", "-grid", "-mask", "-compress", "-resize"):
+		if mode not in ("-convert", "-grid", "-mask", "-compress", "-resize", "-tint"):
 			raise (RuntimeError)
 
 		match mode:
@@ -143,9 +176,11 @@ def main():
 			case "-resize":
 				resize_x = sys.argv[4]
 				resize_y = sys.argv[5]
+			case "-tint":
+				tint_color = sys.argv[4]
 
 	except (IndexError, RuntimeError):
-		print("Incorrect arguments. Valid arguments are: -convert, -grid, -mask, -compress, or -resize")
+		print("Incorrect arguments. Valid arguments are: -convert, -grid, -mask, -compress, -tint, or -resize")
 		return
 
 	im = ImageManager(input_dir, output_dir)
@@ -160,6 +195,8 @@ def main():
 			im.compress_images_in_dir(compress_format, dds_compression)
 		case "-resize":
 			im.resize_images_in_dir(resize_x, resize_y)
+		case "-tint":
+			im.tint_images_in_dir(tint_color)
 
 if __name__ == '__main__':
 	main()

@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 
 # Check for color conflicts in definition.csv file
 # Make sure the top of the file is formatted like this or it won't work

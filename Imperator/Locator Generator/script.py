@@ -1,7 +1,7 @@
 import numpy as np
 
 """
-    Autogenerate city, fort, and great_work locators.
+    Automatically place city, fort, and great_work locators.
     will still have to go into map editor and manually do some locators after running but most should be good
 """
 

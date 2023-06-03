@@ -20,8 +20,6 @@ def get_provinces_in_file(filename):
             provs.append(pid)
         if '"riverine_terrain"' in p_data or '"coastal_terrain"' in p_data or '"ocean"' in p_data:
             sea_provs.append(pid)
-        # else:
-        #     provs.append(pid)
     return (provs, sea_provs)
 
 def write_list(li, name, comment):

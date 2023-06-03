@@ -3,7 +3,7 @@ import zipfile
 import patoolib
 
 if __name__ == '__main__':
-    file = "io_pdx_mesh.zip"
+    file = "models.7z"
 
     if file.endswith(".7z"):
         with py7zr.SevenZipFile(file, mode='r') as z:

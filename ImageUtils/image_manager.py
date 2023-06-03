@@ -1,6 +1,5 @@
 import sys
 import os
-import re
 from wand import image as WandImage
 from PIL import Image, ImageOps
 from PIL.ImageColor import getcolor, getrgb
@@ -42,6 +41,25 @@ class ImageManager:
 				# jpg has no alpha so just save as a png instead, could probably find a better way to add mask to jpg
 				filename = filename.replace(".jpg", ".png").replace(".jpeg", ".png")
 			out.save(self.get_file_name(filename))
+
+	def add_frame_to_center(self, frame_file):
+		for i, filename in enumerate(self.get_pbar()):
+			input_image = Image.open(filename).convert("RGBA")
+			frame_image = Image.open(frame_file).convert("RGBA")
+
+			frame_size = frame_image.size
+			input_size = input_image.size
+			frame_pos = ((input_size[0] - frame_size[0]) // 2, (input_size[1] - frame_size[1]) // 2)
+
+			crop_box = (frame_pos[0], frame_pos[1], frame_pos[0] + frame_size[0], frame_pos[1] + frame_size[1])
+
+			input_image = input_image.crop(crop_box)
+
+			output_image = Image.new("RGBA", frame_size)
+			output_image.paste(input_image, (0, 0), input_image)
+			output_image.paste(frame_image, (0, 0), frame_image)
+
+			output_image.save(self.get_file_name(filename))
 
 	def split_grid(self, xPieces, yPieces):
 		xPieces = int(xPieces)
@@ -99,12 +117,18 @@ class ImageManager:
 				filename = filename.replace(self.inputdir, self.outputdir)
 				img.save(filename=filename)
 
+	def downscale_images_in_dir(self, downscale_factor):
+		for filename in self.get_pbar():
+			image = Image.open(filename)
+			downscaled_image = image.resize((image.size[0] // downscale_factor, image.size[1] // downscale_factor))
+			downscaled_image.save(self.get_file_name(filename))
+
 	def convert_images_in_dir(self, old, new):
 		pbar = self.get_pbar(lambda f: True if f.endswith(old) else False)
 		for i, filename in enumerate(pbar):
-			with WandImage.Image(filename=filename) as img:
-				filename = filename.replace(old, new).replace(self.inputdir, self.outputdir)
-				img.save(filename=filename)
+			src = Image.open(filename)
+			filename = filename.replace(old, new).replace(self.inputdir, self.outputdir)
+			src.save(filename)
 
 	def tint_images_in_dir(self, tint='#ffffff'):
 		for i, filename in enumerate(self.get_pbar()):
@@ -148,7 +172,7 @@ def main():
 		input_dir = sys.argv[1]
 		output_dir = sys.argv[2]
 		mode = sys.argv[3]
-		if mode not in ("-convert", "-grid", "-mask", "-compress", "-resize", "-tint"):
+		if mode not in ("-convert", "-grid", "-mask", "-compress", "-resize", "-tint", "-frame", "-downscale"):
 			raise (RuntimeError)
 
 		match mode:
@@ -178,9 +202,13 @@ def main():
 				resize_y = sys.argv[5]
 			case "-tint":
 				tint_color = sys.argv[4]
+			case "-frame":
+				frame_file = sys.argv[4]
+			case "-downscale":
+				downscale_factor = int(sys.argv[4])
 
 	except (IndexError, RuntimeError):
-		print("Incorrect arguments. Valid arguments are: -convert, -grid, -mask, -compress, -tint, or -resize")
+		print("Incorrect arguments. Valid arguments are: -convert, -grid, -mask, -compress, -tint, -frame, -downscale, or -resize")
 		return
 
 	im = ImageManager(input_dir, output_dir)
@@ -197,6 +225,10 @@ def main():
 			im.resize_images_in_dir(resize_x, resize_y)
 		case "-tint":
 			im.tint_images_in_dir(tint_color)
+		case "-frame":
+			im.add_frame_to_center(frame_file)
+		case "-downscale":
+			im.downscale_images_in_dir(downscale_factor)
 
 if __name__ == '__main__':
 	main()

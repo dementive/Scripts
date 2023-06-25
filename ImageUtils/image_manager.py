@@ -22,8 +22,8 @@ class ImageManager:
 		return progressbar
 
 	def get_file_name(self, filename):
-		inputdir_rel = self.inputdir.rpartition("\\")[2]
-		return f'{self.outputdir}\\{filename}'.replace(inputdir_rel, "")
+		inputdir_rel = self.inputdir.rpartition("/")[2]
+		return f'{self.outputdir}/{filename}'.replace(inputdir_rel, "")
 
 	def add_mask(self, mask_file):
 		for i, filename in enumerate(self.get_pbar()):
@@ -87,7 +87,7 @@ class ImageManager:
 					img.options['dds:compression'] = dds_compression  # dxt1/dxt3/dxt5
 					img.save(filename=self.get_file_name(filename))
 			if filetype in (".jpg", ".jpeg", ".png"):
-				abs_image_path = os.getcwd() + "\\" + filename
+				abs_image_path = os.getcwd() + "/" + filename
 
 				(only_image_path, image_info) = os.path.split(abs_image_path)
 				im = Image.open(abs_image_path, "r")

@@ -9,6 +9,15 @@ import os
     You probably don't want to run this script from inside of your mod folder as it will do some funky things.
 """
 
+included_directories = [
+    "common",
+    "culture_decisions",
+    "decisions",
+    "events",
+    "map_data",
+    "setup",
+]
+
 
 def minify_text(text):
     lines = text.splitlines()
@@ -40,6 +49,9 @@ def minify_all(input_dir):
     for dirpath, dirnames, filenames in os.walk(input_dir):
         if "on_action" in dirpath:
             continue
+        if not any(s in dirpath for s in included_directories):
+            continue
+
         for filename in [x for x in filenames if x.endswith(".txt")]:
             filepath = os.path.join(dirpath, filename)
             with open(filepath, "r") as file:
@@ -78,6 +90,4 @@ if __name__ == "__main__":
     #     "/home/nathan/.local/share/Paradox Interactive/Imperator/mod/ImperatorFMO/events/subject_focus_events.txt"
     # )
 
-    minify_all(
-        "/home/nathan/.local/share/Paradox Interactive/Imperator/mod/ImperatorFMO/"
-    )
+    minify_all("/home/nathan/.local/share/Paradox Interactive/Imperator/mod/Invictus/")

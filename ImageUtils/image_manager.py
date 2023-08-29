@@ -148,11 +148,23 @@ class ImageManager:
             downscaled_image.save(self.get_file_name(filename))
 
     def convert_images_in_dir(self, old, new):
-        pbar = self.get_pbar(lambda f: True if f.endswith(old) else False)
-        for filename in pbar:
+        for filename in self.get_pbar():
             src = Image.open(filename)
             filename = filename.replace(old, new).replace(self.inputdir, self.outputdir)
             src.save(filename)
+
+    def make_all_multiple_of_four(self):
+        # For GPU texture compression to work texture resolution must be a multiple of 4
+        pbar = self.get_pbar(lambda f: True if f.endswith(old) else False)
+        for filename in pbar:
+            image = Image.open(filename)
+            imgwidth, imgheight = image.size
+            while imgwidth % 4 != 0:
+                imgwidth -= 1
+            while imgheight % 4 != 0:
+                imgheight -= 1
+            image = image.resize((imgwidth, imgheight))
+            image.save(self.get_file_name(filename))
 
     def tint_images_in_dir(self, tint="#ffffff"):
         for filename in self.get_pbar():

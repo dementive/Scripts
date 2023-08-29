@@ -54,7 +54,7 @@ def minify_all(input_dir):
 
         for filename in [x for x in filenames if x.endswith(".txt")]:
             filepath = os.path.join(dirpath, filename)
-            with open(filepath, "r") as file:
+            with open(filepath, "r", encoding="utf-8-sig") as file:
                 contents = file.read()
 
             minified_contents = minify_text(contents)
@@ -65,7 +65,7 @@ def minify_all(input_dir):
             if not os.path.exists(output_dirpath):
                 os.makedirs(output_dirpath)
 
-            with open(os.path.join(output_dirpath, filename), "w") as file:
+            with open(os.path.join(output_dirpath, filename), "w", encoding="utf-8-sig") as file:
                 file.write(minified_contents)
 
 
@@ -90,4 +90,4 @@ if __name__ == "__main__":
     #     "/home/nathan/.local/share/Paradox Interactive/Imperator/mod/ImperatorFMO/events/subject_focus_events.txt"
     # )
 
-    minify_all("/home/nathan/.local/share/Paradox Interactive/Imperator/mod/Invictus/")
+    minify_all("/home/nathan/.local/share/Paradox Interactive/Imperator/mod/ImperatorFMO")

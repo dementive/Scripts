@@ -88,6 +88,6 @@ for i in unit_icons:
     for j in terrain_icons:
         create_terrain_icon(i, j)
 
-for i in unit_icons:
-    for j in other_modifier_icons:
-        create_other_unit_icon(i, j)
+# for i in unit_icons:
+#     for j in other_modifier_icons:
+#         create_other_unit_icon(i, j)

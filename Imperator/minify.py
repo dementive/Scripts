@@ -23,16 +23,12 @@ def minify_text(text):
     lines = text.splitlines()
 
     minified_lines = [
-        " ".join(line.split("#")[0].split())
-        for line in lines
-        if line.split("#")[0].strip() != ""
+        " ".join(line.split("#")[0].split()) for line in lines if line.split("#")[0].strip() != ""
     ]
 
     minified_lines = list(
         map(
-            lambda line: line.replace("namespace", "\nnamespace") + "\n"
-            if "namespace" in line
-            else line,
+            lambda line: line.replace("namespace", "\nnamespace") + "\n" if "namespace" in line else line,
             minified_lines,
         )
     )
@@ -90,4 +86,4 @@ if __name__ == "__main__":
     #     "/home/nathan/.local/share/Paradox Interactive/Imperator/mod/ImperatorFMO/events/subject_focus_events.txt"
     # )
 
-    minify_all("/home/nathan/.local/share/Paradox Interactive/Imperator/mod/ImperatorFMO")
+    minify_all("C:\\Users\\demen\\Documents\\Paradox Interactive\\Imperator\\mod\\ImperatorFMO")
